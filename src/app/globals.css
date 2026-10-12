@@ -339,8 +339,13 @@ html[dir="rtl"] a:hover .arrow {
   align-items: center;
   gap: 8px;
 }
-.nav-group button span {
-  font-size: 16px;
+.nav-chevron {
+  display: block;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.nav-group > button[aria-expanded="true"] .nav-chevron {
+  transform: rotate(180deg);
 }
 .header-actions {
   display: flex;
@@ -1210,6 +1215,27 @@ html[dir="rtl"] a:hover .arrow {
   color: #a4ac9e;
   max-width: 270px;
   margin-block-end: 18px;
+}
+.social-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block-start: 22px;
+}
+.social-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #ffffff40;
+  color: #d4d9ce;
+}
+.social-icon svg {
+  display: block;
+}
+a.social-icon:hover {
+  border-color: #ffffff;
+  color: #ffffff;
 }
 .disclaimer {
   padding-block: 28px;

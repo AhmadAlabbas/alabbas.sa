@@ -2,6 +2,7 @@ import Link from "next/link";
 import { copy, capabilities, type Locale, text } from "@/content/site";
 import { CookiePreferences } from "./consent";
 import { Brand } from "./brand";
+import { SocialIcons } from "./social-icons";
 export function Footer({ locale }: { locale: Locale }) {
   const c = copy[locale];
   return (
@@ -15,11 +16,7 @@ export function Footer({ locale }: { locale: Locale }) {
             <p>{c.footerText}</p>
             <p>{c.office}</p>
             <small>{c.officeNote}</small>
-            <small>
-              {locale === "en"
-                ? "Verified social channels pending confirmation."
-                : "قنوات التواصل المعتمدة بانتظار التأكيد."}
-            </small>
+            <SocialIcons locale={locale} />
           </div>
           <div>
             <h2>{c.company}</h2>

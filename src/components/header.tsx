@@ -67,8 +67,22 @@ export function Header({ locale }: { locale: Locale }) {
                 aria-controls={`mega-${key}`}
                 onClick={() => setOpen(open === key ? null : key)}
               >
-                {key === "solutions" ? c.solutions : c.clients}
-                <span aria-hidden="true">⌄</span>
+                <span>{key === "solutions" ? c.solutions : c.clients}</span>
+                <svg
+                  className="nav-chevron"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="m3 4.5 3 3 3-3" />
+                </svg>
               </button>
               {open === key && (
                 <div id={`mega-${key}`} className="mega-menu">

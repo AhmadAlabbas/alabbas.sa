@@ -31,6 +31,7 @@ Production builds use Next.js’s supported Webpack bundler (`next build --webpa
 
 - `src/content/site.ts`: bilingual interface copy, capabilities, client groups, insight summaries and dates.
 - `src/content/editorial.ts`: bilingual sample articles and draft policies.
+- `src/content/social.ts`: LinkedIn, X and Instagram entries. Icons are displayed without links until verified profile URLs are supplied.
 - `src/components`: shared header, mega menus, footer, buttons, page headings, cards, figures, forms and consent controls.
 - `src/components/home.tsx`: complete Home page and shared CTA / capability components.
 - `src/components/pages.tsx`: interior page templates.
