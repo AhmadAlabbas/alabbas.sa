@@ -4,7 +4,7 @@ A bilingual, responsive investment-management website built with Next.js App Rou
 
 ## Develop
 
-Use Node.js 24 LTS and npm. The cloud checkout is `/workspace/alabbas.sa`.
+Use Node.js 22 or 24 LTS and npm. `.nvmrc` selects 22 to match the Hostinger deployment. The cloud checkout is `/workspace/alabbas.sa`.
 
 ```sh
 npm ci
@@ -60,7 +60,7 @@ Before a public launch, replace the in-memory limiter with a shared edge/service
 
 ## Deployment
 
-For Hostinger **Node.js Web App hosting**, follow [HOSTINGER.md](HOSTINGER.md). Connect `AhmadAlabbas/alabbas.sa` on branch `main`, use Node.js 24 and enable automatic deployments. Hostinger installs and builds each pushed update. A source ZIP is available as an alternative.
+For Hostinger **Node.js Web App hosting**, follow [HOSTINGER.md](HOSTINGER.md). Connect `AhmadAlabbas/alabbas.sa` on branch `main`, use Node.js 22 and enable automatic deployments. Hostinger installs and builds each pushed update. A source ZIP is available as an alternative.
 
 Import the repository into Vercel, select Next.js, use Node.js 24, and retain the default `npm run build` command. Configure the canonical origin and approved delivery gateway in project settings, then redeploy. Preview environments should have a separate approved test gateway and origin. The application does not perform deployment automatically.
 

@@ -7,7 +7,7 @@ Use the GitHub repository **`AhmadAlabbas/alabbas.sa`**, deploying the **`main`*
 1. In hPanel, open **Websites** and add a **Node.js web app**, or open the existing destination Node.js app.
 2. Choose **GitHub** as the deployment source and authorize Hostinger's GitHub integration for **`AhmadAlabbas/alabbas.sa`**. Restrict repository access to the repositories you intend to deploy.
 3. Select repository **`AhmadAlabbas/alabbas.sa`**, branch **`main`**, and the repository root **`.`**.
-4. Choose the **Next.js** preset, **Node.js 24**, install **`npm ci`**, build **`npm run build`**, and start **`npm start`** where these settings are exposed. Keep the preset's output / entry-file defaults.
+4. Choose the **Next.js** preset, **Node.js 22**, install **`npm ci`**, build **`npm run build`**, and start **`npm start`** where these settings are exposed. Keep the preset's output / entry-file defaults.
 5. Set **`SITE_URL=https://alabbas.sa`** in the app environment settings before building. Configure approved enquiry-delivery settings separately if available; do not commit credentials to GitHub.
 6. Enable **automatic deployments** for pushes to **`main`** in the app's deployment settings. Trigger the initial deployment and check the build / startup logs. If your panel does not expose an automatic deployment option, verify its supported trigger with Hostinger rather than assuming pushes deploy automatically.
 7. Verify the deployed app using the checks below, attach **`alabbas.sa`**, follow the app's specific DNS instructions and enable HTTPS.
@@ -28,13 +28,13 @@ The prepared source archive is `alabbas-hostinger-node.zip`. It is for **Node.js
 
 1. Open Hostinger **hPanel → Websites** and add a **Node.js web app**. If you already created the destination Node.js app, open its deployment settings instead. Preserve any existing live website until the new app has been verified.
 2. Choose the file-upload / ZIP deployment option and upload `alabbas-hostinger-node.zip`. The ZIP has `package.json` directly at its root; use `.` as the project root if a root directory is requested.
-3. Choose the **Next.js** framework preset and **Node.js 24**. The project currently requires Node 24. If that version is unavailable in your panel, report the versions offered before deploying; do not ignore the engine requirement.
+3. Choose the **Next.js** framework preset and **Node.js 22**. The project supports Node 22 and 24; the supplied Hostinger build-settings screen selects 22.x.
 4. Use the following settings where Hostinger exposes them. Keep the Next.js preset's output-directory / entry-file defaults. Do not choose a static HTML preset.
 
 | Setting                     | Value                                     |
 | --------------------------- | ----------------------------------------- |
 | Framework                   | Next.js                                   |
-| Node.js                     | 24.x                                      |
+| Node.js                     | 22.x                                      |
 | Root directory              | `.` / archive root                        |
 | Install command             | `npm ci`                                  |
 | Build command               | `npm run build`                           |
@@ -46,7 +46,7 @@ The prepared source archive is `alabbas-hostinger-node.zip`. It is for **Node.js
 5. Add `SITE_URL` to the app's environment settings **before building**. Canonical URLs, hreflang and the sitemap are generated at build time. If you first deploy to a temporary domain, set `SITE_URL` to its actual HTTPS origin and rebuild when switching to `https://alabbas.sa`.
 6. Deploy and inspect the build / startup logs. A passing build is not sufficient by itself: open both `/en` and `/ar` on the deployed app and perform the checks below.
 
-Labels in hPanel may differ; use the Next.js / Node.js app workflow and the configuration values above. Hostinger's current panel was not accessed or verified from this chat.
+Labels in hPanel may differ; use the Next.js / Node.js app workflow and the configuration values above. The supplied build-settings PDF confirms Next.js, main, Node.js 22.x, root ./ and the default Next.js build settings. The live panel was not accessed from this chat.
 
 ## Domain and HTTPS
 
@@ -62,6 +62,8 @@ Configure the approved provider using Hostinger's private app environment settin
 
 - `CONTACT_WEBHOOK_URL`: approved **HTTPS** endpoint accepting POST JSON.
 - `CONTACT_WEBHOOK_TOKEN`: optional server-only bearer credential.
+
+Hostinger may detect all three keys in `.env.example` and mark their values required. Only `SITE_URL` is needed to display the site. Until a real gateway is configured, remove the `CONTACT_WEBHOOK_URL` and `CONTACT_WEBHOOK_TOKEN` entries from Hostinger’s environment-variable editor. Do not enter dummy endpoints or credentials. The contact form will continue to report unavailable delivery.
 
 Never put credentials into the ZIP, client code or chat. See `README.md` for the gateway payload and response contract. Confirm provider delivery end to end with a controlled test enquiry. Add durable rate limiting using the hosting provider's trusted IP forwarding behavior before accepting public enquiries.
 

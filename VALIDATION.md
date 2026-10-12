@@ -49,3 +49,13 @@ Cloud configuration draft persistence was confirmed for **install_script** and *
 ## Evidence
 
 Current-instance QA files are in `/workspace/alabbas-qa`: `results.json`, `interactions.json`, `lighthouse-en-final.json`, `lighthouse-ar-final.json`, `lighthouse-desktop-final.json` and screenshots. One-off browser tooling was installed outside the application checkout. The application’s repeatable smoke tests are retained under `tests/` and documented in `README.md`.
+
+## Hostinger Node.js 22 verification
+
+The supplied Hostinger build-settings PDF selects Next.js, branch `main`, Node.js **22.x**, root `./` and the default Next.js build settings. The application engine declaration now accepts Node.js 22 and 24, and `.nvmrc` selects 22 to match that deployment.
+
+A fresh source copy outside the application checkout was installed using Node.js **22.23.3** and the frozen dependency lockfile. Installation, ESLint and the production build all passed; all 44 localized website pages were generated. The production server started on port 3010, all **7** smoke tests passed with none skipped, and the Next.js logo-optimization request returned HTTP 200 with a valid WebP image. The existing Node.js 24 build was preserved during this check.
+
+The temporary verification copy's parent has a separate lockfile for its Node.js binary installation, causing a workspace-root inference warning. This is specific to that local verification directory; it did not fail the build or functional requests. It does not establish the root layout of Hostinger's deployment checkout.
+
+These results validate Node.js 22 compatibility locally. The live Hostinger build, environment-variable values and initial domain deployment still require verification after deployment. Set `SITE_URL=https://alabbas.sa`; remove the optional webhook keys from Hostinger's environment editor until a real delivery gateway is configured.
