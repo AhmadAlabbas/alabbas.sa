@@ -59,3 +59,13 @@ A fresh source copy outside the application checkout was installed using Node.js
 The temporary verification copy's parent has a separate lockfile for its Node.js binary installation, causing a workspace-root inference warning. This is specific to that local verification directory; it did not fail the build or functional requests. It does not establish the root layout of Hostinger's deployment checkout.
 
 These results validate Node.js 22 compatibility locally. The live Hostinger build, environment-variable values and initial domain deployment still require verification after deployment. Set `SITE_URL=https://alabbas.sa`; remove the optional webhook keys from Hostinger's environment editor until a real delivery gateway is configured.
+
+## Hostinger Turbopack failure and Webpack build
+
+The supplied Hostinger deployment log checked out `8a8dc40`, successfully installed dependencies with Node.js 22, then failed while Turbopack evaluated PostCSS for `src/app/globals.css`. Its worker Node process exited before the build connected to it. `/sitemap.xml/route` is the endpoint reported by the failed build; the log does not identify a problem with sitemap content.
+
+The production build script now uses Next.js’s documented **`next build --webpack`** option. This selects the supported Webpack pipeline instead of the failing Turbopack CSS-worker path. Hostinger should continue invoking **`npm run build`** so it uses this repository setting.
+
+A clean output directory was built using Node.js **22.23.3**, reusing the dependency installation previously verified from the unchanged lockfile. The Webpack production build and TypeScript checks passed and generated all 44 website pages. The resulting production server on port 3011 passed all **7** smoke tests with none skipped, browser interaction checks, **176** route / viewport checks without horizontal overflow, and a logo-optimization request returning a valid WebP image. ESLint and formatting checks also passed. This compiler change does not alter application content or remove the sitemap, contact handler, validation or security headers.
+
+This confirms the alternative build and runtime locally. The actual Hostinger worker restriction has not been reproduced here, and a successful Hostinger redeployment still needs verification. The dependency-audit notices preceding the crash are separate from the fatal bundler error; no forced audit downgrade was applied.

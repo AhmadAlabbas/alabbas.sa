@@ -48,6 +48,14 @@ The prepared source archive is `alabbas-hostinger-node.zip`. It is for **Node.js
 
 Labels in hPanel may differ; use the Next.js / Node.js app workflow and the configuration values above. The supplied build-settings PDF confirms Next.js, main, Node.js 22.x, root ./ and the default Next.js build settings. The live panel was not accessed from this chat.
 
+## Build compatibility
+
+`npm run build` now uses **`next build --webpack`**. The supplied Hostinger log shows a Turbopack panic while evaluating PostCSS for `src/app/globals.css`: its Node worker exits before the build connects to it. The sitemap route appears in the error because the failed CSS evaluation prevents writing application endpoints; the log does not identify a sitemap-content defect.
+
+Keep Hostinger's build command as **`npm run build`** so it uses the repository's tested Webpack production build. If a custom command was changed to `next build`, replace it with `npm run build`. Development can continue using the existing `npm run dev` command.
+
+The installation's five high-severity audit notices are the documented development-tool dependency chain, separate from this fatal build error. Do not run `npm audit fix --force` to repair the bundler crash; it proposes an incompatible framework-tooling downgrade.
+
 ## Domain and HTTPS
 
 After the deployed app works, attach `alabbas.sa` in the app's domain settings. Follow the DNS records Hostinger shows for **that specific app**; no destination IP address is assumed in these instructions. If DNS is managed elsewhere, change only the records needed to route the website. Preserve mail / verification records such as MX, SPF, DKIM and DMARC.

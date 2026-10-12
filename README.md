@@ -25,6 +25,8 @@ npm test
 
 The smoke suite exercises all 44 pages, metadata, redirects, 404s, SEO endpoints, security headers, contact validation, the honeypot, unavailable integration behavior and request throttling. Set `TEST_BASE_URL` to test a different local origin. The contact tests assume no delivery integration is configured and use synthetic documentation-range IP addresses.
 
+Production builds use Next.js’s supported Webpack bundler (`next build --webpack`) to avoid the Turbopack CSS-worker crash observed in Hostinger’s build environment. Keep the hosting build command as `npm run build`.
+
 ## Content and design
 
 - `src/content/site.ts`: bilingual interface copy, capabilities, client groups, insight summaries and dates.
