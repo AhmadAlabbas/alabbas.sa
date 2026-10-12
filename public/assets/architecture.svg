@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1400" viewBox="0 0 1200 1400">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#333530"/><stop offset="1" stop-color="#0e1110"/></linearGradient><linearGradient id="wall"><stop stop-color="#a1a29b"/><stop offset="1" stop-color="#555950"/></linearGradient><pattern id="grid" width="50" height="55" patternUnits="userSpaceOnUse"><path d="M0 0H50V55" fill="none" stroke="#171d17" stroke-width="2"/></pattern></defs>
+<path fill="url(#bg)" d="M0 0h1200v1400H0z"/><path fill="url(#wall)" d="m220 1400 190-950 410-310-20 1260z"/><path fill="url(#grid)" d="m220 1400 190-950 410-310-20 1260z"/>
+<path fill="#b8b8ad" d="m820 140 100 180 70 1080H800z"/><path fill="#3c443b" d="m920 320 160 100 120 980H990z"/>
+<g fill="none" stroke="#252c23" stroke-width="3"><path d="m810 350 118 87m-121 43 129 87m-132 43 140 87m-143 43 151 87m-154 43 162 87m-165 43 173 87m-176 43 184 87"/><path d="m857 205 38 1195m-1-1125 48 1125"/></g>
+<path fill="#262d26" d="m0 1400 130-530 185-80-95 610z"/><path fill="#151a15" d="m1030 950 170-90v540h-148z"/>
+<path fill="none" stroke="#c0b99f" opacity=".35" d="m0 1130 1200-440M0 1230l1200-440"/>
+</svg>
