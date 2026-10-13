@@ -5,7 +5,7 @@ export const portalCopy = {
     signUp: "Create account",
     title: "Your account.\nProtected by design.",
     intro:
-      "Manage your account access and security. Banking, KYC and investment services are not available in this phase.",
+      "Manage your account access and security, and complete your details for compliance review. Banking and investment services are not available in this phase.",
     name: "Full name",
     email: "Email address",
     password: "Password",
@@ -89,7 +89,7 @@ export const portalCopy = {
     signUp: "إنشاء حساب",
     title: "حسابك.\nوأمنك في صميمه.",
     intro:
-      "إدارة الوصول إلى حسابك وأمنه. الخدمات المصرفية والتحقق من العميل والاستثمار غير متاحة في هذه المرحلة.",
+      "إدارة الوصول إلى حسابك وأمنه وإكمال بياناتك لمراجعة الامتثال. الخدمات المصرفية والاستثمار غير متاحة في هذه المرحلة.",
     name: "الاسم الكامل",
     email: "البريد الإلكتروني",
     password: "كلمة المرور",

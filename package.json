@@ -16,6 +16,7 @@
     "db:migrate": "prisma migrate deploy",
     "test:portal": "node --conditions=react-server --import tsx --test --test-concurrency=1 tests/portal/*.test.ts",
     "portal:cron": "node --env-file-if-exists=.env scripts/portal-cron.mjs",
+    "portal:set-role": "node --env-file-if-exists=.env --conditions=react-server --import tsx scripts/portal-set-role.ts",
     "build:portal": "node --conditions=react-server --import tsx scripts/portal-preflight.ts && prisma migrate deploy && next build --webpack"
   },
   "dependencies": {

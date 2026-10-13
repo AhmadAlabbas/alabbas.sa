@@ -134,7 +134,11 @@ async function consumeToken(
   if (changed.count !== 1) throw new PortalError(400, "INVALID_TOKEN");
   return token;
 }
-async function useTotp(tx: Prisma.TransactionClient, user: User, code: string) {
+export async function useTotp(
+  tx: Prisma.TransactionClient,
+  user: User,
+  code: string,
+) {
   if (!user.totpSecret) throw new PortalError(400, "TOTP_INVALID");
   const step = validateTotp(
     decrypt(user.totpSecret, `totp:${user.id}`),
@@ -148,6 +152,7 @@ async function useTotp(tx: Prisma.TransactionClient, user: User, code: string) {
       totpLastStep: { lt: step },
       passwordVersion: user.passwordVersion,
       status: { not: "SUSPENDED" },
+      role: user.role,
     },
     data: { totpLastStep: step },
   });

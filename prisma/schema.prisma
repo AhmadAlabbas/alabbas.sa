@@ -60,6 +60,96 @@ model User {
   tokens          ActionToken[]
   auditEvents     AuditEvent[]
   dataRequests    DataRequest[]
+  kycProfile      KycProfile?
+  kycReviews      KycReview[]
+  kycEvents       KycEvent[]
+}
+
+enum KycStatus {
+  DRAFT
+  SUBMITTED
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+}
+
+enum KycDecision {
+  APPROVED
+  CHANGES_REQUESTED
+  REJECTED
+}
+
+model KycProfile {
+  id            String          @id @default(cuid()) @db.VarChar(30)
+  userId        String          @unique @db.VarChar(30)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  status        KycStatus       @default(DRAFT)
+  version       Int             @default(1)
+  encryptedData String          @db.LongText
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  submissions   KycSubmission[]
+  events        KycEvent[]
+
+  @@index([status, updatedAt])
+}
+
+// Submitted snapshots and their consents/reviews are append-only in application code.
+model KycSubmission {
+  id            String       @id @default(cuid()) @db.VarChar(30)
+  profileId     String       @db.VarChar(30)
+  profile       KycProfile   @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  version       Int
+  encryptedData String       @db.LongText
+  riskBand      String       @db.VarChar(20)
+  createdAt     DateTime     @default(now())
+  consents      KycConsent[]
+  review        KycReview?
+
+  @@unique([profileId, version])
+}
+
+model KycConsent {
+  id           String        @id @default(cuid()) @db.VarChar(30)
+  submissionId String        @db.VarChar(30)
+  submission   KycSubmission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  kind         String        @db.VarChar(30)
+  version      String        @db.VarChar(30)
+  locale       String        @db.Char(2)
+  text         String        @db.Text
+  acceptedAt   DateTime      @default(now())
+  networkHash  String        @db.Char(64)
+  userAgent    String        @db.VarChar(180)
+
+  @@unique([submissionId, kind])
+}
+
+model KycReview {
+  id              String        @id @default(cuid()) @db.VarChar(30)
+  submissionId    String        @unique @db.VarChar(30)
+  submission      KycSubmission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  reviewerId      String        @db.VarChar(30)
+  reviewer        User          @relation(fields: [reviewerId], references: [id], onDelete: Restrict)
+  decision        KycDecision
+  checksConfirmed Boolean       @default(false)
+  encryptedReason String        @db.Text
+  createdAt       DateTime      @default(now())
+}
+
+// Kept separately from Phase 1's time-limited authentication logs.
+model KycEvent {
+  id          String     @id @default(cuid()) @db.VarChar(30)
+  profileId   String     @db.VarChar(30)
+  profile     KycProfile @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  actorId     String     @db.VarChar(30)
+  actor       User       @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  action      String     @db.VarChar(40)
+  version     Int
+  createdAt   DateTime   @default(now())
+  networkHash String     @db.Char(64)
+  userAgent   String     @db.VarChar(180)
+
+  @@index([profileId, createdAt])
 }
 
 model Session {

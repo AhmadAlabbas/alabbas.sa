@@ -65,6 +65,11 @@ class Browser {
   }
 }
 beforeEach(async () => {
+  await prisma.kycConsent.deleteMany();
+  await prisma.kycReview.deleteMany();
+  await prisma.kycEvent.deleteMany();
+  await prisma.kycSubmission.deleteMany();
+  await prisma.kycProfile.deleteMany();
   await prisma.dataRequest.deleteMany();
   await prisma.auditEvent.deleteMany();
   await prisma.session.deleteMany();
@@ -667,9 +672,9 @@ test("Role checks do not promote clients into administrative roles", () => {
   );
   assert.throws(() => requireRole("RELATIONSHIP_MANAGER", ["ADMIN"]));
 });
-test("KYC, banking and order endpoints remain unavailable in Phase 1 even after MFA", async () => {
+test("Banking and order endpoints remain unavailable even after MFA", async () => {
   const a = await full();
-  for (const action of ["kyc", "bank-connections", "orders", "invest", "admin"])
+  for (const action of ["bank-connections", "orders", "invest", "admin"])
     assert.equal((await a.browser.get(`/api/portal/${action}`)).status, 404);
 });
 test("Cron requires a bearer secret and purges expired records without a worker", async () => {
