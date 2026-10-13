@@ -6,7 +6,7 @@ export function Brand({ dark = false }: { dark?: boolean }) {
         src="/assets/logo.png"
         width={2172}
         height={724}
-        sizes="192px"
+        unoptimized
         alt="ALABBAS"
         className="brand-source"
         loading={dark ? "lazy" : "eager"}
