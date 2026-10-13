@@ -24,6 +24,13 @@ const config: NextConfig = {
           },
         ],
       },
+      {
+        source: "/:locale(en|ar)/demo/portal/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          { key: "Referrer-Policy", value: "no-referrer" },
+        ],
+      },
     ];
   },
 };
