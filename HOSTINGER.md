@@ -2,6 +2,8 @@
 
 Use the GitHub repository **`AhmadAlabbas/alabbas.sa`**, deploying the **`main`** branch. Hostinger builds the source and runs the Next.js server. Updates become live after changes are committed and pushed to the connected branch and Hostinger completes a successful deployment.
 
+Client portal phases are delivered on separate feature branches through reviewed PRs; never push portal work directly to `main`. Keep `PORTAL_ENABLED=false` on the public app during review. See [PORTAL.md](PORTAL.md) for MySQL migrations, private auth/mail configuration, protected cron and the approved portal's `build:portal` command. Public builds retain `npm run build` and require no portal credentials.
+
 ## Connect GitHub and enable deployments
 
 1. In hPanel, open **Websites** and add a **Node.js web app**, or open the existing destination Node.js app.
@@ -72,6 +74,8 @@ Configure the approved provider using Hostinger's private app environment settin
 - `CONTACT_WEBHOOK_TOKEN`: optional server-only bearer credential.
 
 Hostinger may detect all three keys in `.env.example` and mark their values required. Only `SITE_URL` is needed to display the site. Until a real gateway is configured, remove the `CONTACT_WEBHOOK_URL` and `CONTACT_WEBHOOK_TOKEN` entries from Hostinger’s environment-variable editor. Do not enter dummy endpoints or credentials. The contact form will continue to report unavailable delivery.
+
+The portal adds more names to `.env.example`; leave the feature false and omit the database, encryption, cron and SMTP entries from the editor until the approved portal is configured. Empty placeholder secrets are not required for a disabled public deployment.
 
 Never put credentials into the ZIP, client code or chat. See `README.md` for the gateway payload and response contract. Confirm provider delivery end to end with a controlled test enquiry. Add durable rate limiting using the hosting provider's trusted IP forwarding behavior before accepting public enquiries.
 

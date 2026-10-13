@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  INDIVIDUAL
+  INSTITUTION
+  GOVERNMENT
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+  COMPLIANCE_OFFICER
+  RELATIONSHIP_MANAGER
+}
+
+enum AccountStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+}
+
+enum SessionKind {
+  CHALLENGE
+  AUTHENTICATED
+}
+
+enum TokenPurpose {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+enum DataRequestKind {
+  EXPORT
+  DELETION
+}
+
+model User {
+  id              String        @id @default(cuid()) @db.VarChar(30)
+  email           String        @unique @db.VarChar(254)
+  name            String        @db.VarChar(120)
+  passwordHash    String        @db.VarChar(255)
+  passwordVersion Int           @default(1)
+  emailVerifiedAt DateTime?
+  accountType     AccountType   @default(INDIVIDUAL)
+  role            Role          @default(CLIENT)
+  status          AccountStatus @default(PENDING)
+  totpSecret      String?       @db.Text
+  totpEnabledAt   DateTime?
+  totpLastStep    BigInt        @default(-1)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  sessions        Session[]
+  tokens          ActionToken[]
+  auditEvents     AuditEvent[]
+  dataRequests    DataRequest[]
+}
+
+model Session {
+  id              String      @id @default(cuid()) @db.VarChar(30)
+  tokenHash       String      @unique @db.Char(64)
+  userId          String      @db.VarChar(30)
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind            SessionKind
+  passwordVersion Int
+  createdAt       DateTime    @default(now())
+  lastSeenAt      DateTime    @default(now())
+  expiresAt       DateTime
+  userAgent       String      @db.VarChar(180)
+  networkHash     String      @db.Char(64)
+
+  @@index([userId, kind])
+  @@index([expiresAt])
+}
+
+model ActionToken {
+  id              String       @id @default(cuid()) @db.VarChar(30)
+  tokenHash       String       @unique @db.Char(64)
+  purpose         TokenPurpose
+  userId          String       @db.VarChar(30)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordVersion Int
+  expiresAt       DateTime
+  consumedAt      DateTime?
+  createdAt       DateTime     @default(now())
+
+  @@index([expiresAt])
+}
+
+model AuditEvent {
+  id          String   @id @default(cuid()) @db.VarChar(30)
+  userId      String?  @db.VarChar(30)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      String   @db.VarChar(64)
+  networkHash String   @db.Char(64)
+  userAgent   String   @db.VarChar(180)
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+model RateLimit {
+  id        String   @id @db.Char(64)
+  attempts  Int      @default(1)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model EmailJob {
+  id            String    @id @default(cuid()) @db.VarChar(30)
+  payload       String    @db.LongText
+  attempts      Int       @default(0)
+  lockedUntil   DateTime?
+  nextAttemptAt DateTime  @default(now())
+  sentAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([sentAt, nextAttemptAt])
+}
+
+model DataRequest {
+  id         String          @id @default(cuid()) @db.VarChar(30)
+  userId     String          @db.VarChar(30)
+  user       User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  kind       DataRequestKind
+  status     String          @default("PENDING") @db.VarChar(20)
+  createdAt  DateTime        @default(now())
+  resolvedAt DateTime?
+
+  @@index([userId, createdAt])
+}
