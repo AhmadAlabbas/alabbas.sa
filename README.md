@@ -27,6 +27,12 @@ The smoke suite exercises all 44 pages, metadata, redirects, 404s, SEO endpoints
 
 Production builds use Next.js’s supported Webpack bundler (`next build --webpack`) to avoid the Turbopack CSS-worker crash observed in Hostinger’s build environment. Keep the hosting build command as `npm run build`.
 
+## Client portal (Phase 1)
+
+For the combined Phases 1–4 release and activation on alabbas.sa, follow [PORTAL_RELEASE.md](PORTAL_RELEASE.md). The account backend needs private Hostinger MySQL/SMTP settings, migrations and protected cron; financial data and bank connections remain mock.
+
+The client portal is **disabled by default** with `PORTAL_ENABLED=false`. See [PORTAL.md](PORTAL.md) for authentication architecture, MySQL migrations, private configuration, tests, Hostinger cron/deployment steps and legal prerequisites. Portal changes use one feature branch and reviewed PR per phase; do not push them directly to `main`. Public builds keep using `npm run build` without database or auth credentials.
+
 ## Content and design
 
 - `src/content/site.ts`: bilingual interface copy, capabilities, client groups, insight summaries and dates.

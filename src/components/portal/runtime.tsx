@@ -9,6 +9,7 @@ export type PortalRuntime = {
   get: (path: string, signal?: AbortSignal) => Promise<Response>;
   authPath: (locale: Locale, screen: string) => string;
   securityPath: (locale: Locale) => string;
+  entryPath?: (locale: Locale) => string;
   demo?: boolean;
   sampleInputs?: {
     name: string;
@@ -24,6 +25,7 @@ const live: PortalRuntime = {
   get: (path, signal) => fetch(path, { cache: "no-store", signal }),
   authPath: (locale, screen) => `/${locale}/auth/${screen}`,
   securityPath: (locale) => `/${locale}/portal/security`,
+  entryPath: (locale) => `/${locale}/portal`,
 };
 export const PortalRuntimeContext = createContext<PortalRuntime | null>(null);
 export function usePortalRuntime() {

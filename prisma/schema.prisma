@@ -1,0 +1,307 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  INDIVIDUAL
+  INSTITUTION
+  GOVERNMENT
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+  COMPLIANCE_OFFICER
+  RELATIONSHIP_MANAGER
+}
+
+enum AccountStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+}
+
+enum SessionKind {
+  CHALLENGE
+  AUTHENTICATED
+}
+
+enum TokenPurpose {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+enum DataRequestKind {
+  EXPORT
+  DELETION
+}
+
+model User {
+  id                String             @id @default(cuid()) @db.VarChar(30)
+  email             String             @unique @db.VarChar(254)
+  name              String             @db.VarChar(120)
+  passwordHash      String             @db.VarChar(255)
+  passwordVersion   Int                @default(1)
+  emailVerifiedAt   DateTime?
+  accountType       AccountType        @default(INDIVIDUAL)
+  role              Role               @default(CLIENT)
+  status            AccountStatus      @default(PENDING)
+  totpSecret        String?            @db.Text
+  totpEnabledAt     DateTime?
+  totpLastStep      BigInt             @default(-1)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  sessions          Session[]
+  tokens            ActionToken[]
+  auditEvents       AuditEvent[]
+  dataRequests      DataRequest[]
+  kycProfile        KycProfile?
+  kycReviews        KycReview[]
+  kycEvents         KycEvent[]
+  notificationReads NotificationRead[]
+  bankConnections   BankConnection[]
+  bankEvents        BankEvent[]
+}
+
+enum BankStatus {
+  PENDING
+  ACTIVE
+  REVOKING
+  REVOKED
+  EXPIRED
+  FAILED
+}
+
+model BankConnection {
+  id                 String        @id @default(cuid()) @db.VarChar(30)
+  userId             String        @db.VarChar(30)
+  user               User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  bankId             String        @db.VarChar(40)
+  providerId         String        @db.VarChar(30)
+  status             BankStatus    @default(PENDING)
+  version            Int           @default(1)
+  encryptedReference String?       @db.Text
+  expiresAt          DateTime
+  revokedAt          DateTime?
+  revocationAttempts Int           @default(0)
+  nextRevocationAt   DateTime      @default(now())
+  leaseUntil         DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  consents           BankConsent[]
+  events             BankEvent[]
+
+  @@unique([userId, bankId])
+  @@index([status, nextRevocationAt])
+}
+
+model BankConsent {
+  id           String         @id @default(cuid()) @db.VarChar(30)
+  connectionId String         @db.VarChar(30)
+  connection   BankConnection @relation(fields: [connectionId], references: [id], onDelete: Restrict)
+  revision     Int
+  textVersion  String         @db.VarChar(30)
+  locale       String         @db.Char(2)
+  text         String         @db.Text
+  scopes       Json
+  acceptedAt   DateTime       @default(now())
+  expiresAt    DateTime
+  networkHash  String         @db.Char(64)
+  userAgent    String         @db.VarChar(180)
+
+  @@unique([connectionId, revision])
+}
+
+model BankEvent {
+  id           String         @id @default(cuid()) @db.VarChar(30)
+  connectionId String         @db.VarChar(30)
+  connection   BankConnection @relation(fields: [connectionId], references: [id], onDelete: Restrict)
+  actorId      String?        @db.VarChar(30)
+  actor        User?          @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  actorKind    String         @default("CLIENT") @db.VarChar(10)
+  action       String         @db.VarChar(40)
+  revision     Int
+  createdAt    DateTime       @default(now())
+  networkHash  String         @db.Char(64)
+  userAgent    String         @db.VarChar(180)
+
+  @@index([connectionId, createdAt])
+}
+
+model NotificationRead {
+  id              String   @id @default(cuid()) @db.VarChar(30)
+  userId          String   @db.VarChar(30)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notificationKey String   @db.VarChar(60)
+  readAt          DateTime @default(now())
+
+  @@unique([userId, notificationKey])
+}
+
+enum KycStatus {
+  DRAFT
+  SUBMITTED
+  CHANGES_REQUESTED
+  APPROVED
+  REJECTED
+}
+
+enum KycDecision {
+  APPROVED
+  CHANGES_REQUESTED
+  REJECTED
+}
+
+model KycProfile {
+  id            String          @id @default(cuid()) @db.VarChar(30)
+  userId        String          @unique @db.VarChar(30)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  status        KycStatus       @default(DRAFT)
+  version       Int             @default(1)
+  encryptedData String          @db.LongText
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  submissions   KycSubmission[]
+  events        KycEvent[]
+
+  @@index([status, updatedAt])
+}
+
+// Submitted snapshots and their consents/reviews are append-only in application code.
+model KycSubmission {
+  id            String       @id @default(cuid()) @db.VarChar(30)
+  profileId     String       @db.VarChar(30)
+  profile       KycProfile   @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  version       Int
+  encryptedData String       @db.LongText
+  riskBand      String       @db.VarChar(20)
+  createdAt     DateTime     @default(now())
+  consents      KycConsent[]
+  review        KycReview?
+
+  @@unique([profileId, version])
+}
+
+model KycConsent {
+  id           String        @id @default(cuid()) @db.VarChar(30)
+  submissionId String        @db.VarChar(30)
+  submission   KycSubmission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  kind         String        @db.VarChar(30)
+  version      String        @db.VarChar(30)
+  locale       String        @db.Char(2)
+  text         String        @db.Text
+  acceptedAt   DateTime      @default(now())
+  networkHash  String        @db.Char(64)
+  userAgent    String        @db.VarChar(180)
+
+  @@unique([submissionId, kind])
+}
+
+model KycReview {
+  id              String        @id @default(cuid()) @db.VarChar(30)
+  submissionId    String        @unique @db.VarChar(30)
+  submission      KycSubmission @relation(fields: [submissionId], references: [id], onDelete: Restrict)
+  reviewerId      String        @db.VarChar(30)
+  reviewer        User          @relation(fields: [reviewerId], references: [id], onDelete: Restrict)
+  decision        KycDecision
+  checksConfirmed Boolean       @default(false)
+  encryptedReason String        @db.Text
+  createdAt       DateTime      @default(now())
+}
+
+// Kept separately from Phase 1's time-limited authentication logs.
+model KycEvent {
+  id          String     @id @default(cuid()) @db.VarChar(30)
+  profileId   String     @db.VarChar(30)
+  profile     KycProfile @relation(fields: [profileId], references: [id], onDelete: Restrict)
+  actorId     String     @db.VarChar(30)
+  actor       User       @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  action      String     @db.VarChar(40)
+  version     Int
+  createdAt   DateTime   @default(now())
+  networkHash String     @db.Char(64)
+  userAgent   String     @db.VarChar(180)
+
+  @@index([profileId, createdAt])
+}
+
+model Session {
+  id              String      @id @default(cuid()) @db.VarChar(30)
+  tokenHash       String      @unique @db.Char(64)
+  userId          String      @db.VarChar(30)
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind            SessionKind
+  passwordVersion Int
+  createdAt       DateTime    @default(now())
+  lastSeenAt      DateTime    @default(now())
+  expiresAt       DateTime
+  userAgent       String      @db.VarChar(180)
+  networkHash     String      @db.Char(64)
+
+  @@index([userId, kind])
+  @@index([expiresAt])
+}
+
+model ActionToken {
+  id              String       @id @default(cuid()) @db.VarChar(30)
+  tokenHash       String       @unique @db.Char(64)
+  purpose         TokenPurpose
+  userId          String       @db.VarChar(30)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passwordVersion Int
+  expiresAt       DateTime
+  consumedAt      DateTime?
+  createdAt       DateTime     @default(now())
+
+  @@index([expiresAt])
+}
+
+model AuditEvent {
+  id          String   @id @default(cuid()) @db.VarChar(30)
+  userId      String?  @db.VarChar(30)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action      String   @db.VarChar(64)
+  networkHash String   @db.Char(64)
+  userAgent   String   @db.VarChar(180)
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+model RateLimit {
+  id        String   @id @db.Char(64)
+  attempts  Int      @default(1)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model EmailJob {
+  id            String    @id @default(cuid()) @db.VarChar(30)
+  payload       String    @db.LongText
+  attempts      Int       @default(0)
+  lockedUntil   DateTime?
+  nextAttemptAt DateTime  @default(now())
+  sentAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([sentAt, nextAttemptAt])
+}
+
+model DataRequest {
+  id         String          @id @default(cuid()) @db.VarChar(30)
+  userId     String          @db.VarChar(30)
+  user       User            @relation(fields: [userId], references: [id], onDelete: Restrict)
+  kind       DataRequestKind
+  status     String          @default("PENDING") @db.VarChar(20)
+  createdAt  DateTime        @default(now())
+  resolvedAt DateTime?
+
+  @@index([userId, createdAt])
+}
