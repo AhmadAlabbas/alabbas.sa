@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 const config: NextConfig = {
   poweredByHeader: false,
+  serverExternalPackages: ["pdfkit"],
+  outputFileTracingIncludes: {
+    "/api/portal/statements/*": [
+      "./node_modules/@fontsource/inter/files/inter-latin-400-normal.woff",
+      "./src/lib/portal/pdf-assets/IBMPlexSansArabic-Regular.ttf",
+    ],
+  },
   async redirects() {
     return [{ source: "/", destination: "/en", permanent: false }];
   },

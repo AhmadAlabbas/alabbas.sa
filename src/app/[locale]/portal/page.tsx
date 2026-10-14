@@ -6,8 +6,13 @@ export default async function Page({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const session = await currentSession();
+  let session;
+  try {
+    session = await currentSession();
+  } catch {
+    redirect(`/${locale}/auth/sign-in`);
+  }
   redirect(
-    `/${locale}/portal/${session.user.role === "CLIENT" ? "kyc" : "admin/kyc"}`,
+    `/${locale}/portal/${session.user.role === "CLIENT" ? "dashboard" : "admin/kyc"}`,
   );
 }
