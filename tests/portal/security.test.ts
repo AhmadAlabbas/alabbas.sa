@@ -65,6 +65,9 @@ class Browser {
   }
 }
 beforeEach(async () => {
+  await prisma.bankEvent.deleteMany();
+  await prisma.bankConsent.deleteMany();
+  await prisma.bankConnection.deleteMany();
   await prisma.notificationRead.deleteMany();
   await prisma.kycConsent.deleteMany();
   await prisma.kycReview.deleteMany();
@@ -673,9 +676,9 @@ test("Role checks do not promote clients into administrative roles", () => {
   );
   assert.throws(() => requireRole("RELATIONSHIP_MANAGER", ["ADMIN"]));
 });
-test("Banking and order endpoints remain unavailable even after MFA", async () => {
+test("Order and investing endpoints remain unavailable even after MFA", async () => {
   const a = await full();
-  for (const action of ["bank-connections", "orders", "invest", "admin"])
+  for (const action of ["orders", "invest", "admin"])
     assert.equal((await a.browser.get(`/api/portal/${action}`)).status, 404);
 });
 test("Cron requires a bearer secret and purges expired records without a worker", async () => {
@@ -691,7 +694,12 @@ test("Cron requires a bearer secret and purges expired records without a worker"
     headers: { Authorization: `Bearer ${process.env.PORTAL_CRON_SECRET}` },
   });
   assert.equal(r.status, 200);
-  assert.deepEqual(await r.json(), { sent: 0, failed: 0 });
+  assert.deepEqual(await r.json(), {
+    sent: 0,
+    failed: 0,
+    bankRevocationAttempts: 0,
+    bankRevoked: 0,
+  });
   assert.equal(await prisma.rateLimit.count(), 0);
 });
 test("Encryption rejects tampering and account-context swaps; passwords verify securely", async () => {
