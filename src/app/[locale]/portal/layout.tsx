@@ -7,6 +7,7 @@ import { currentSession } from "@/lib/portal/sessions";
 import Link from "next/link";
 import { kycCopy } from "@/content/kyc";
 import { dashboardCopy } from "@/content/dashboard";
+import { bankCopy } from "@/content/banks";
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
   referrer: "no-referrer",
@@ -47,6 +48,9 @@ export default async function PortalLayout({
           <Link href={`/${locale}/portal/kyc`}>{c.onboarding}</Link>
         ) : (
           <Link href={`/${locale}/portal/admin/kyc`}>{c.review}</Link>
+        )}
+        {session.user.role === "CLIENT" && (
+          <Link href={`/${locale}/portal/banks`}>{bankCopy[lang].nav}</Link>
         )}
       </nav>
       {children}

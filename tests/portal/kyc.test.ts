@@ -79,6 +79,9 @@ class Browser {
   }
 }
 beforeEach(async () => {
+  await prisma.bankEvent.deleteMany();
+  await prisma.bankConsent.deleteMany();
+  await prisma.bankConnection.deleteMany();
   await prisma.notificationRead.deleteMany();
   await prisma.kycConsent.deleteMany();
   await prisma.kycReview.deleteMany();

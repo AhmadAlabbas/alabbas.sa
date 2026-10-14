@@ -1,0 +1,56 @@
+# Phase 4 — mock bank connections
+
+This increment is stacked on Phase 3 (`feat/portal-phase-3-dashboard`, PR #5), which depends on Phases 2 and 1. Review the parents first, then rebase/retarget onto reviewed main while preserving the public site and its independent online demo. This phase stops at a pull request; it does not deploy to alabbas.sa or change production flags.
+
+## Client experience and access
+
+`/[locale]/portal/banks` adds English and Arabic/RTL bank navigation using the existing portal components, typography and tokens. A verified-email, mandatory-MFA individual client can choose **Sample Bank A** or **Sample Bank B**, grant accounts (required), balances and/or transactions, explicitly accept consent, browse masked fictional accounts and paginated transactions, and disconnect in one click. Consent and connection history remains available after disconnect and reconnect. All financial figures are fictional SAR cents, separate from the Phase 3 sample portfolio. No real bank, bank credential, payment, KYC approval or money movement is involved.
+
+`PORTAL_ENABLED` remains **false by default**. Disabled pages and APIs return noindex 404s before requesting credentials. Enabled APIs require the existing full session, current individual-client permissions and nonsuspended account; anonymous, MFA-challenge, staff and institutional/government accounts are denied. Pending KYC clients can explore mocks only. A future real connection must require approved KYC and applicable legal authorization.
+
+| Endpoint                                                                               | Purpose                                                                                                                                      |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/portal/bank-connections`                                                     | Own metadata, consent versions and recent events; no provider reference or identity fields.                                                  |
+| `POST /api/portal/bank-connections`                                                    | Strict JSON `bankId`, `locale`, `consentVersion`, `accepted: true`, and selected `scopes`; canonical Origin and double-submit CSRF required. |
+| `GET /api/portal/bank-connections/[id]/accounts`                                       | Owned active-consent accounts, with balances only when separately granted.                                                                   |
+| `GET /api/portal/bank-connections/[id]/transactions?accountId=sample-current&cursor=3` | Owned active-consent, authorized-account transactions; cursor optional and restricted.                                                       |
+| `POST /api/portal/bank-connections/[id]/disconnect`                                    | Strict empty JSON, CSRF checked; blocks reads before asking the provider to revoke. Returns 202 if acknowledgement is pending.               |
+
+Responses are private/no-store and noindex under the existing nonce CSP. Reads verify ownership, consent state, expiration, requested scope and provider consent status; they recheck local consent/version and the session after provider I/O. This blocks reads finishing after a local disconnect. Separate database-backed rate limits cover list, connect, data and disconnect operations. The public sitemap, footer, CMA wording, legal pages and public dictionaries remain unchanged.
+
+## Provider boundary and storage
+
+Server-only `BankConnectionProvider` defines consent creation/status, accounts, balances, paginated transactions and idempotent revocation. `MockProvider` is the only wired implementation. The service rejects nonmock providers even if injected internally; neither an environment variable nor client input enables a real partner. Provider responses stay server-side; the client receives a restricted read-only DTO. Arrays/cursors are bounded in the mock; a future adapter must honor the five-second AbortSignal and bound/validate its responses.
+
+Two additive migrations create `BankConnection`, immutable application-level `BankConsent` history and durable `BankEvent` history, then add explicit system-event attribution. Existing migrations are unchanged. One row per client/bank, revision checks and atomic transitions prevent duplicate connections and stale activation. Consent records contain the exact server-defined bilingual text/version, scopes, timestamp, requested expiry, pseudonymous network hash and user-agent. The **30-day mock duration is an engineering demonstration, not an approved regulatory consent policy**. A provider can shorten effective expiry but never extend the requested maximum.
+
+Opaque provider references are encrypted with the existing server-only AES-GCM key and a connection-specific authenticated context. No bank username, password, full bank identifier, account balance or transaction history is stored in MySQL. No financial credentials, handles or secrets are returned to the browser or application logs. Existing essential session/CSRF cookies and cookie-policy controls apply; this phase adds no tracker or cookie.
+
+Account/consent/event foreign keys restrict deletion. Auth maintenance does not delete bank records under its provisional 90-day audit retention. Include connection metadata, consent/event history and relevant processing records when fulfilling approved PDPL export requests; do not release encrypted handles or infrastructure secrets. Deletion remains the existing pending staff workflow, subject to approved retention and legal holds. This phase does not invent a retention period or implement automatic bank-record erasure; compliance must approve and operate that process before real collection.
+
+## Disconnect and failure handling
+
+Disconnect commits `REVOKING` and increments the local version before calling the provider, immediately denying further server reads. Only acknowledged revocation changes the row to `REVOKED`, clears the encrypted reference and records completion. Repeated calls are idempotent; a short database lease prevents simultaneous retry ownership. Disconnect during pending consent creation wins: an eventual handle is attached for revocation and never activates locally.
+
+Failures retain the encrypted handle and truthful pending status, with exponential backoff. The existing protected POST cron retries up to five due records, with a ten-second loop budget and five-second provider-operation signals. Auth/email maintenance runs independently in the same request. After five failed attempts, access stays blocked and an operator must investigate and reconcile safely; it is never reported as revoked. System retries have `actorKind=SYSTEM`, no invented client actor, and a dedicated cron context. A pending operation with no returned handle also remains blocked and needs reconciliation if creation cannot complete. No network transaction is held across provider I/O.
+
+A future real integration needs durable idempotency lookup/callback reconciliation for ambiguous creation, crashes and expired leases, a reviewed recovery procedure and operational alerting. The current stateless mock uses the database as its access/revocation authority. Disconnection prevents future server access; it cannot erase information previously viewed or downloaded.
+
+## Hostinger and GitHub
+
+No new runtime dependency, environment variable, root access, Docker image or long-running worker is required. Keep `.env.example` and its server-only empty secret placeholders; keep the real portal disabled in production. Follow [PORTAL.md](PORTAL.md), [PORTAL_PHASE_2.md](PORTAL_PHASE_2.md) and [PORTAL_PHASE_3.md](PORTAL_PHASE_3.md) for Node **22**, MySQL/TLS, SMTP, secure keys, backup and staging configuration.
+
+1. Review this branch and its parents. Use an isolated Hostinger Node.js staging app/branch and synthetic data to inspect enabled portal features. Production stays on reviewed main; this PR does not change its GitHub deployment connection.
+2. Back up staging, install with `npm ci`, then use `npm run build:portal` (configuration preflight, `prisma migrate deploy`, Webpack build) and `npm start`. Disabled public builds use `npm run build` without portal secrets or database access. Never run reset, `db push` or `migrate dev` against client data.
+3. Keep the existing Hostinger cron invoking `npm run portal:cron` / the protected `/api/portal/cron` POST using the server-only cron secret. The endpoint now includes bounded bank revocation retries; no second scheduler or public GET task is added. Check its acknowledgement/failure counters and investigate exhausted or handle-less pending operations. Use HTTPS and test the actual host's request limits and trusted-IP configuration.
+4. Validate feature-off 404s, MFA, permissions, consent expiry/scopes, disconnect races, cron authorization, EN/AR layouts and unchanged public pages. A rollback does not remove additive migrations or retained records; disable portal access and recover data safely.
+
+## Tests and approvals still required
+
+`npm run test:portal` adds bank API, permission, consent, concurrency, expiry and provider-failure tests alongside auth/KYC/dashboard regression suites. Tests require a disposable loopback `_test` MySQL database and delete only its synthetic records. See [PORTAL_PHASE_4_VALIDATION.md](PORTAL_PHASE_4_VALIDATION.md) for actual checks and limits.
+
+No paid license, API key or bank contract is needed for the mock. Before any real bank connection: confirm CMA permitted activities and Saudi Open Banking applicability, independently verify the selected **SAMA-licensed partner and its account-information scope**, sign provider/data-processing contracts, approve Saudi PDPL data residency/transfers and retention, complete independent security review, and provision sandbox then production server-only credentials. Lean or Tarabut may be candidates; no current license or contract is asserted here.
+
+The real adapter requires a reviewed bank catalog, allowlisted provider endpoints, hosted authorization (never bank credentials in Alabbas), verified signed callbacks/webhooks and OAuth state/PKCE where required, approved consent/revocation/renewal policy, response validation, encrypted credential rotation, approved-KYC gating, idempotent reconciliation, provider outage handling and support/alerting. None is implemented or enabled by this mock interface.
+
+Legal copy requiring approval: **privacy** (bank account information/transactions, exact purposes/scopes, providers, retention/transfers, export/deletion), **portal terms** (read-only connection, expiration, renewal, revocation and service limits), **Open Banking consent disclosures** (partner identity, permissions, duration and disconnect consequences), and any approved **regulatory/CMA disclosures**. Existing footer/CMA/legal wording stays untouched. Phase 5 additionally requires product/risk/fee approvals, payment/custody partner contracts and keys; no investing endpoint is enabled here.

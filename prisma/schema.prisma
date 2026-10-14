@@ -64,6 +64,73 @@ model User {
   kycReviews        KycReview[]
   kycEvents         KycEvent[]
   notificationReads NotificationRead[]
+  bankConnections   BankConnection[]
+  bankEvents        BankEvent[]
+}
+
+enum BankStatus {
+  PENDING
+  ACTIVE
+  REVOKING
+  REVOKED
+  EXPIRED
+  FAILED
+}
+
+model BankConnection {
+  id                 String        @id @default(cuid()) @db.VarChar(30)
+  userId             String        @db.VarChar(30)
+  user               User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  bankId             String        @db.VarChar(40)
+  providerId         String        @db.VarChar(30)
+  status             BankStatus    @default(PENDING)
+  version            Int           @default(1)
+  encryptedReference String?       @db.Text
+  expiresAt          DateTime
+  revokedAt          DateTime?
+  revocationAttempts Int           @default(0)
+  nextRevocationAt   DateTime      @default(now())
+  leaseUntil         DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  consents           BankConsent[]
+  events             BankEvent[]
+
+  @@unique([userId, bankId])
+  @@index([status, nextRevocationAt])
+}
+
+model BankConsent {
+  id           String         @id @default(cuid()) @db.VarChar(30)
+  connectionId String         @db.VarChar(30)
+  connection   BankConnection @relation(fields: [connectionId], references: [id], onDelete: Restrict)
+  revision     Int
+  textVersion  String         @db.VarChar(30)
+  locale       String         @db.Char(2)
+  text         String         @db.Text
+  scopes       Json
+  acceptedAt   DateTime       @default(now())
+  expiresAt    DateTime
+  networkHash  String         @db.Char(64)
+  userAgent    String         @db.VarChar(180)
+
+  @@unique([connectionId, revision])
+}
+
+model BankEvent {
+  id           String         @id @default(cuid()) @db.VarChar(30)
+  connectionId String         @db.VarChar(30)
+  connection   BankConnection @relation(fields: [connectionId], references: [id], onDelete: Restrict)
+  actorId      String?        @db.VarChar(30)
+  actor        User?          @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  actorKind    String         @default("CLIENT") @db.VarChar(10)
+  action       String         @db.VarChar(40)
+  revision     Int
+  createdAt    DateTime       @default(now())
+  networkHash  String         @db.Char(64)
+  userAgent    String         @db.VarChar(180)
+
+  @@index([connectionId, createdAt])
 }
 
 model NotificationRead {
