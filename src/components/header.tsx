@@ -11,6 +11,7 @@ import {
 } from "@/content/site";
 import { Arrow } from "./ui";
 import { Brand } from "./brand";
+import { PortalHeaderLinks } from "./portal/header-links";
 export function Header({ locale }: { locale: Locale }) {
   const c = copy[locale];
   const pathname = usePathname();
@@ -121,6 +122,7 @@ export function Header({ locale }: { locale: Locale }) {
           <Link href={`/${locale}/careers`}>{c.careers}</Link>
         </nav>
         <div className="header-actions">
+          <PortalHeaderLinks locale={locale} />
           <Link
             href={switchPath}
             className="language"

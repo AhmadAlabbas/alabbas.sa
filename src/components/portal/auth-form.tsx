@@ -77,7 +77,9 @@ export function AuthForm({
         return;
       }
       if (result.message === "SIGNED_IN") {
-        router.push(runtime.securityPath(locale));
+        router.push(
+          runtime.entryPath?.(locale) ?? runtime.securityPath(locale),
+        );
         router.refresh();
         return;
       }
