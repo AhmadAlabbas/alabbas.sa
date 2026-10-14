@@ -74,7 +74,7 @@ export function AuthForm({
         return;
       }
       if (result.message === "SIGNED_IN") {
-        router.push(`/${locale}/portal/security`);
+        router.push(`/${locale}/portal`);
         router.refresh();
         return;
       }

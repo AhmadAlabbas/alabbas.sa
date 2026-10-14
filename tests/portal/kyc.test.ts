@@ -79,6 +79,7 @@ class Browser {
   }
 }
 beforeEach(async () => {
+  await prisma.notificationRead.deleteMany();
   await prisma.kycConsent.deleteMany();
   await prisma.kycReview.deleteMany();
   await prisma.kycEvent.deleteMany();

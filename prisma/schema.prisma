@@ -42,27 +42,38 @@ enum DataRequestKind {
 }
 
 model User {
-  id              String        @id @default(cuid()) @db.VarChar(30)
-  email           String        @unique @db.VarChar(254)
-  name            String        @db.VarChar(120)
-  passwordHash    String        @db.VarChar(255)
-  passwordVersion Int           @default(1)
-  emailVerifiedAt DateTime?
-  accountType     AccountType   @default(INDIVIDUAL)
-  role            Role          @default(CLIENT)
-  status          AccountStatus @default(PENDING)
-  totpSecret      String?       @db.Text
-  totpEnabledAt   DateTime?
-  totpLastStep    BigInt        @default(-1)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  sessions        Session[]
-  tokens          ActionToken[]
-  auditEvents     AuditEvent[]
-  dataRequests    DataRequest[]
-  kycProfile      KycProfile?
-  kycReviews      KycReview[]
-  kycEvents       KycEvent[]
+  id                String             @id @default(cuid()) @db.VarChar(30)
+  email             String             @unique @db.VarChar(254)
+  name              String             @db.VarChar(120)
+  passwordHash      String             @db.VarChar(255)
+  passwordVersion   Int                @default(1)
+  emailVerifiedAt   DateTime?
+  accountType       AccountType        @default(INDIVIDUAL)
+  role              Role               @default(CLIENT)
+  status            AccountStatus      @default(PENDING)
+  totpSecret        String?            @db.Text
+  totpEnabledAt     DateTime?
+  totpLastStep      BigInt             @default(-1)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  sessions          Session[]
+  tokens            ActionToken[]
+  auditEvents       AuditEvent[]
+  dataRequests      DataRequest[]
+  kycProfile        KycProfile?
+  kycReviews        KycReview[]
+  kycEvents         KycEvent[]
+  notificationReads NotificationRead[]
+}
+
+model NotificationRead {
+  id              String   @id @default(cuid()) @db.VarChar(30)
+  userId          String   @db.VarChar(30)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notificationKey String   @db.VarChar(60)
+  readAt          DateTime @default(now())
+
+  @@unique([userId, notificationKey])
 }
 
 enum KycStatus {
