@@ -37,7 +37,7 @@ The client portal is **disabled by default** with `PORTAL_ENABLED=false`. See [P
 
 - `src/content/site.ts`: bilingual interface copy, capabilities, client groups, insight summaries and dates.
 - `src/content/editorial.ts`: bilingual sample articles and draft policies.
-- `src/content/social.ts`: LinkedIn, X and Instagram entries. Icons are displayed without links until verified profile URLs are supplied.
+- `src/content/social.ts`: YouTube, Instagram, TikTok, X, LinkedIn and Pinterest entries. Circular icons are displayed without links until verified profile URLs are supplied.
 - `src/components`: shared header, mega menus, footer, buttons, page headings, cards, figures, forms and consent controls.
 - `src/components/home.tsx`: complete Home page and shared CTA / capability components.
 - `src/components/pages.tsx`: interior page templates.
