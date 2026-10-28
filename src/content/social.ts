@@ -7,10 +7,29 @@ export const socialProfiles: {
   name: string;
   url?: string;
 }[] = [
-  { platform: "youtube", name: "YouTube" },
-  { platform: "instagram", name: "Instagram" },
-  { platform: "tiktok", name: "TikTok" },
-  { platform: "x", name: "X" },
-  { platform: "linkedin", name: "LinkedIn" },
-  { platform: "pinterest", name: "Pinterest" },
+  {
+    platform: "youtube",
+    name: "YouTube",
+    url: "https://www.youtube.com/@AlabbasCompany",
+  },
+  {
+    platform: "instagram",
+    name: "Instagram",
+    url: "https://www.instagram.com/alabbascompany/",
+  },
+  {
+    platform: "tiktok",
+    name: "TikTok",
+    url: "https://www.tiktok.com/@alabbascompany",
+  },
+  {
+    platform: "x",
+    name: "X",
+    url: "https://x.com/alabbas_company",
+  },
+  {
+    platform: "linkedin",
+    name: "LinkedIn",
+    url: "https://www.linkedin.com/company/alabbascompany/",
+  },
 ];
