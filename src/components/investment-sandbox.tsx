@@ -62,8 +62,11 @@ export function InvestmentSandbox({ locale }: { locale: Locale }) {
   const [notice, setNotice] = useState("");
   const [approvalMode, setApprovalMode] = useState(false);
   useEffect(() => {
-    setPortfolio(loadPaper("INDIVIDUAL"));
-    setHydrated(true);
+    const task = window.setTimeout(() => {
+      setPortfolio(loadPaper("INDIVIDUAL"));
+      setHydrated(true);
+    }, 0);
+    return () => window.clearTimeout(task);
   }, []);
   useEffect(() => {
     if (!hydrated) return;
