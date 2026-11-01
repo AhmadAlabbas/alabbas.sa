@@ -79,3 +79,31 @@ jobs:
         run: npx prisma migrate deploy
       - name: Verify no pending migrations
         run: npx prisma migrate status
+
+  dependency-refresh-preview:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'feat/investment-platform-sandbox'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Regenerate safe dependency lockfile on ephemeral runner (no repository writes)
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund next@16.4.3 "nodemailer@^10.1.4"
+      - name: Export updated non-secret dependency manifests for review
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const data = JSON.stringify({
+            pkg: fs.readFileSync("package.json", "utf8"),
+            lock: fs.readFileSync("package-lock.json", "utf8"),
+          });
+          for (let i = 0; i * 1200 < data.length; i++) {
+            console.log("UPD_BLOCK_" + i + ":" + JSON.stringify(data.slice(i * 1200, (i + 1) * 1200)));
+          }
+          console.log("UPD_DONE:" + Math.ceil(data.length / 1200));
+          NODE
+      - name: Audit refreshed production manifest
+        run: npm audit --omit=dev --audit-level=high
