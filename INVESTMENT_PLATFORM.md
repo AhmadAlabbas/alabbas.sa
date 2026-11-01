@@ -5,17 +5,17 @@ Status: **non-production investment prototype**, 1 November 2026.
 This project has TWO distinct surfaces:
 
 1. **Corporate website** at alabbas.sa, publicly informational.
-2. **Investment account and trading experience**, planned as a separately deployed, protected investor application (a proposed subdomain is invest.alabbas.sa). The prototype lives at \`/en/invest\` and \`/ar/invest\` so it is easy to review without requiring Hostinger credentials.
+2. **Investment account and trading experience**, planned as a separately deployed, protected investor application (a proposed subdomain is invest.alabbas.sa). The prototype lives at `/en/invest` and `/ar/invest` so it is easy to review without requiring Hostinger credentials.
 
-## Delivered on branch \`feat/investment-platform-sandbox\`
+## Delivered on branch `feat/investment-platform-sandbox`
 
-- **Bilingual fictional investment workspace** at \`/en/invest\` and \`/ar/invest\`: responsive overview, simulated cash and holdings, allocation, sample markets, watchlist, paper buy/sell tickets, order history and investor-category switching.
+- **Bilingual fictional investment workspace** at `/en/invest` and `/ar/invest`: responsive overview, simulated cash and holdings, allocation, sample markets, watchlist, paper buy/sell tickets, order history and investor-category switching.
 - **Paper order validation**: only integer units, no margin, no short selling, no spending more fictional cash than available. Stocks, ETF, fund, bond and sukuk instruments have FIXED FICTIONAL sample prices and issuers. No real market data feeds.
 - **Institutional flow demonstration**: a fictional maker/checker queue for corporation/government sample orders. A role toggle is *purely visual* and is not security or authority verification.
 - **Local-only state**: browser localStorage saves the fictionally funded sample account, partitioned by investor category. Nothing is sent to ALABBAS servers by the demo. Never use these browser records for actual orders or financial records. No real login is required in the sandbox.
-- **Sign-up investor category**: \`INDIVIDUAL\`, \`INSTITUTION\` or \`GOVERNMENT\`. Default remains individual for compatibility. Type is unverified self-attestation, not an approval.
+- **Sign-up investor category**: `INDIVIDUAL`, `INSTITUTION` or `GOVERNMENT`. Default remains individual for compatibility. Type is unverified self-attestation, not an approval.
 - **Entity applications**: after email verification and TOTP, institution/government accounts may submit preliminary legal entity details over an origin/CSRF-protected API, stored encrypted using the existing portal key, with a DB uniqueness constraint and audit log. Applications remain **SUBMITTED**; no self-approval, order routing, trading, funding or authorized representative roles. Personal KYC remains for individuals only.
-- **Safe routing**: entity clients go to \`/en/portal/entity\` (or AR equivalent) instead of an incompatible individual dashboard.
+- **Safe routing**: entity clients go to `/en/portal/entity` (or AR equivalent) instead of an incompatible individual dashboard.
 - **Tests/CI**: paper-order unit tests; GitHub Actions checks for lint, typecheck, tests and a portal-disabled public build.
 
 ## What is NOT delivered or enabled
@@ -32,9 +32,9 @@ These items must not be represented as live services in marketing or UI. Do not 
 
 ## Identity and onboarding data model
 
-Existing \`User.accountType\` already distinguishes individual, institution and government accounts. The new sign-up selection stores this category only, with status \`PENDING\`.
+Existing `User.accountType` already distinguishes individual, institution and government accounts. The new sign-up selection stores this category only, with status `PENDING`.
 
-New \`EntityApplication\` records are available to a **verified email + MFA session only**. They store the applicant's claim (legal entity name, registration reference, jurisdiction SA and representative title) encrypted with AES-256-GCM under a per-user associated-data context. The public API returns application status, **not** the raw identity claims. One application per user is enforced at the database layer.
+New `EntityApplication` records are available to a **verified email + MFA session only**. They store the applicant's claim (legal entity name, registration reference, jurisdiction SA and representative title) encrypted with AES-256-GCM under a per-user associated-data context. The public API returns application status, **not** the raw identity claims. One application per user is enforced at the database layer.
 
 This preliminary application is NOT enough for institutional onboarding. Future regulated build must add:
 
@@ -46,7 +46,7 @@ This preliminary application is NOT enough for institutional onboarding. Future 
 
 ## Proposed investment service architecture (phase 3)
 
-\`\`\`
+```
 Investor portal (browser / mobile)
   -> Auth, MFA, verified org + role permissions
   -> KYC/KYB, suitability, restrictions, product eligibility
@@ -56,7 +56,7 @@ Investor portal (browser / mobile)
   -> Independent double-entry cash/securities ledger
   -> Licensed custodian, bank/payment rails and daily reconciliation
   -> Statements, notifications, audit and compliance monitoring
-\`\`\`
+```
 
 Integration boundary rules:
 
@@ -112,14 +112,14 @@ Integration boundary rules:
 
 Use Node 22, as specified in .nvmrc:
 
-\`\`\`bash
+```bash
 npm ci
 npm run lint
 npm run typecheck
 node --import tsx --test tests/invest-demo.test.ts
 npm run build
 npm run dev
-\`\`\`
+```
 
 Visit http://localhost:3000/en/invest and /ar/invest to review the sandbox. It is unindexed and does not expose order/payment APIs. Authentication lives at /en/auth/* only when the original portal feature flag is enabled and configured; the safe legacy browser-only authentication demo remains at /en/demo/portal.
 
@@ -128,12 +128,12 @@ Visit http://localhost:3000/en/invest and /ar/invest to review the sandbox. It i
 Do not create dummy credentials or test with production customer data.
 
 1. Provision a dedicated MySQL database and restrictive application user over verified TLS, using a trusted CA certificate.
-2. Store \`DATABASE_URL\`, \`PORTAL_ENCRYPTION_KEY\`, \`PORTAL_CRON_SECRET\` and SMTP settings in private Hostinger environment settings. Never commit secrets.
-3. Follow PORTAL_RELEASE.md for backups, migration permissions and \`npm run build:portal\`, noting this branch adds a seventh migration.
+2. Store `DATABASE_URL`, `PORTAL_ENCRYPTION_KEY`, `PORTAL_CRON_SECRET` and SMTP settings in private Hostinger environment settings. Never commit secrets.
+3. Follow PORTAL_RELEASE.md for backups, migration permissions and `npm run build:portal`, noting this branch adds a seventh migration.
 4. Run migrations on a throwaway/staging database first. Ensure the actual MySQL engine and index syntax match.
 5. Verify real email, HTTPS, proxy trust, CSP, cookies, CSRF, rate-limits, cron and reviewer procedures before considering portal activation.
-6. Keep \`PORTAL_ENABLED=false\` until independently checked. Even when enabled, it does NOT enable any real investing functionality.
+6. Keep `PORTAL_ENABLED=false` until independently checked. Even when enabled, it does NOT enable any real investing functionality.
 
 ## Deployment and change safety
 
-This branch is intentionally separate from \`main\`. It must pass CI and manual code/design review before merge. No production deployment is asserted. This work contains no secrets, real payments, live trading or bank integration.
+This branch is intentionally separate from `main`. It must pass CI and manual code/design review before merge. No production deployment is asserted. This work contains no secrets, real payments, live trading or bank integration.
