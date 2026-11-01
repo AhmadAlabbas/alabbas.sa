@@ -125,3 +125,16 @@ test("Contact throttles repeated submissions", async () => {
   assert.equal(r.status, 429);
   assert.ok(r.headers.get("retry-after"));
 });
+
+
+test("Paper investment preview is bilingual, unindexed, and clearly fictional", async () => {
+  for (const locale of ["en", "ar"]) {
+    const response = await fetch(base + "/" + locale + "/invest");
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /<html[^>]*lang="(en|ar)"/);
+    assert.match(html, /noindex/);
+    assert.match(html, /DEMO ONLY|تجريبي/);
+    assert.match(html, /DEMO-ETF/);
+  }
+});
