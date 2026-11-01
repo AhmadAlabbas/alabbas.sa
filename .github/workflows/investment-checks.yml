@@ -34,3 +34,13 @@ jobs:
         run: node --import tsx --test tests/invest-demo.test.ts
       - name: Public production build (portal stays off)
         run: npm run build
+      - name: Public route smoke tests (including new sandbox)
+        run: |
+          npm start > /tmp/alabbas-server.log 2>&1 &
+          for i in $(seq 1 45); do
+            if curl --fail --silent http://127.0.0.1:3000/en > /dev/null; then break; fi
+            sleep 2
+          done
+          npm test
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
