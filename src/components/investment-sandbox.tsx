@@ -23,6 +23,10 @@ type Locale = "en" | "ar";
 type Tab = "overview" | "markets" | "orders" | "onboarding";
 const investors: InvestorKind[] = ["INDIVIDUAL", "INSTITUTION", "GOVERNMENT"];
 const storageKey = (kind: InvestorKind) => "alabbas-paper-demo-v1-" + kind;
+// IDs are only for local paper-order display, never authentication or real orders.
+function newPaperId() {
+  return String(Date.now()) + "-" + Math.random().toString(36).slice(2);
+}
 function loadPaper(kind: InvestorKind): PaperPortfolio {
   try {
     const item = window.localStorage.getItem(storageKey(kind));
@@ -87,11 +91,8 @@ export function InvestmentSandbox({ locale }: { locale: Locale }) {
   const estimate = Number.isSafeInteger(units) && units > 0 && units <= 100000 ? units * chosen.priceHalalas : 0;
   const holdings = DEMO_ASSETS.filter((a) => (portfolio.positions[a.symbol] || 0) > 0);
   const pending = portfolio.requests.filter((r) => r.status === "PENDING");
-  function paperId() {
-    return String(Date.now()) + "-" + Math.random().toString(36).slice(2);
-  }
   function placeOrder() {
-    const result = placePaperOrder(portfolio, kind, side, selected, Number(quantity), paperId(), new Date().toISOString());
+    const result = placePaperOrder(portfolio, kind, side, selected, Number(quantity), newPaperId(), new Date().toISOString());
     if (result.ok) {
       setPortfolio(result.portfolio);
       setNotice(result.message);
@@ -99,7 +100,7 @@ export function InvestmentSandbox({ locale }: { locale: Locale }) {
     } else setNotice(result.error);
   }
   function decide(id: string, approve: boolean) {
-    const result = decidePaperRequest(portfolio, id, approve, paperId(), new Date().toISOString());
+    const result = decidePaperRequest(portfolio, id, approve, newPaperId(), new Date().toISOString());
     if (result.ok) { setPortfolio(result.portfolio); setNotice(result.message); } else setNotice(result.error);
   }
   const kindName = (value: InvestorKind) => ({
