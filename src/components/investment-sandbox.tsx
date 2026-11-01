@@ -155,7 +155,7 @@ export function InvestmentSandbox({ locale }: { locale: Locale }) {
             }}>{t("Reset paper account", "إعادة تعيين الحساب التجريبي")}</button>
           </div>
         </aside>
-        <main className="invest-main" id="investment-demo-main">
+        <div className="invest-main" id="investment-demo-main" role="region" aria-label={t("Investment demo workspace", "مساحة الاستثمار التجريبية")}>
           <div className="invest-section-heading">
             <div>
               <span className="invest-overline">{t("ACCOUNT TYPE", "نوع الحساب")} / {kindName(kind)}</span>
@@ -262,7 +262,7 @@ export function InvestmentSandbox({ locale }: { locale: Locale }) {
               </div>
             </>
           )}
-        </main>
+        </div>
       </div>
       <section className="invest-bottom-disclosure">
         <div className="container"><strong>{t("Important: this is a fictional simulation.", "مهم: هذه محاكاة وهمية فقط.")}</strong><p>{t("ALABBAS does not execute or accept securities orders, accept investment deposits, provide custody, or represent that it has obtained regulatory authorization through this prototype. Real investment services require the appropriate approvals and licensed infrastructure.", "لا تنفذ العباس أو تقبل عبر هذا النموذج طلبات أوراق مالية أو إيداعات استثمارية ولا تقدم خدمات حفظ ولا تدعي الحصول على ترخيص نظامي من خلاله. تتطلب الخدمات الاستثمارية الحقيقية الموافقات والبنية المرخصة المناسبة.")}</p></div>
