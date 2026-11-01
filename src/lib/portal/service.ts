@@ -48,6 +48,7 @@ const schemas = {
       password,
       locale,
       consent: z.literal(true),
+      accountType: z.enum(["INDIVIDUAL", "INSTITUTION", "GOVERNMENT"]).default("INDIVIDUAL"),
     })
     .strict(),
   "sign-in": z.object({ email, password: z.string().min(1).max(128) }).strict(),
@@ -176,7 +177,7 @@ export async function performAuth(
       try {
         await client.$transaction(async (tx) => {
           const user = await tx.user.create({
-            data: { email: d.email, name: d.name, passwordHash: encoded },
+            data: { email: d.email, name: d.name, passwordHash: encoded, accountType: d.accountType },
           });
           await addToken(tx, user, "VERIFY_EMAIL", d.locale);
           await audit(tx, user.id, "ACCOUNT_CREATED", ctx);
