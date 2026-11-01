@@ -26,10 +26,10 @@ export function EntityApplicationForm({ locale }: { locale: Locale }) {
         return r.json() as Promise<ApplicationView>;
       })
       .then(setView)
-      .catch((error) => { if (error.name !== "AbortError") setMessage(t("Unable to load account status.", "تعذر تحميل حالة الحساب.")); })
+      .catch((error) => { if (error.name !== "AbortError") setMessage(ar ? "تعذر تحميل حالة الحساب." : "Unable to load account status."); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [locale]);
+  }, [ar]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy) return;
