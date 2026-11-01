@@ -44,3 +44,38 @@ jobs:
           npm test
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
+
+  mysql-migration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ephemeral_ci_only
+          MYSQL_DATABASE: alabbas_ci_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pephemeral_ci_only"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DATABASE_URL: mysql://root:ephemeral_ci_only@127.0.0.1:3306/alabbas_ci_test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Validate Prisma schema
+        run: npx prisma validate
+      - name: Run all additive migrations against disposable MySQL
+        run: npx prisma migrate deploy
+      - name: Verify no pending migrations
+        run: npx prisma migrate status
