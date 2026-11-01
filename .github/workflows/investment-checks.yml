@@ -1,0 +1,36 @@
+name: Investment platform checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PORTAL_ENABLED: "false"
+      SITE_URL: "https://alabbas.sa"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install frozen dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Investment simulation unit tests
+        run: node --import tsx --test tests/invest-demo.test.ts
+      - name: Public production build (portal stays off)
+        run: npm run build
