@@ -27,6 +27,16 @@ The smoke suite exercises all 44 pages, metadata, redirects, 404s, SEO endpoints
 
 Production builds use Next.js’s supported Webpack bundler (`next build --webpack`) to avoid the Turbopack CSS-worker crash observed in Hostinger’s build environment. Keep the hosting build command as `npm run build`.
 
+## Investment platform preview (not live trading)
+
+An isolated bilingual **paper-investment simulation** is available at `/en/invest` and `/ar/invest` in development, alongside the existing corporate site and the separate authentication demo.
+
+It includes fictional instruments, paper portfolios and buy/sell tickets, and a mock corporate/government approval flow. All prices and balances are invented; no genuine customer funds, market data, securities orders or advice are involved. Sample state is stored locally in the browser.
+
+The client portal now supports unverified institution/government registration categories and protected preliminary entity applications, which always remain pending review. This does not grant institutional authorization or trading access. No real investing feature is enabled by a database, environment flag or this code alone.
+
+See [INVESTMENT_PLATFORM.md](INVESTMENT_PLATFORM.md) for the full four-phase implementation status, system design, regulatory dependencies, migration notes, testing and blocked release gates.
+
 ## Client portal (Phase 1)
 
 For the combined Phases 1–4 release and activation on alabbas.sa, follow [PORTAL_RELEASE.md](PORTAL_RELEASE.md). The account backend needs private Hostinger MySQL/SMTP settings, migrations and protected cron; financial data and bank connections remain mock.
