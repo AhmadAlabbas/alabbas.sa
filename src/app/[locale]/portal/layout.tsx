@@ -39,17 +39,23 @@ export default async function PortalLayout({
         }
       >
         <Link href={`/${locale}/portal/security`}>{c.security}</Link>
-        {session.user.role === "CLIENT" && (
+        {session.user.role === "CLIENT" && session.user.accountType === "INDIVIDUAL" && (
           <Link href={`/${locale}/portal/dashboard`}>
             {dashboardCopy[lang].dashboard}
           </Link>
         )}
         {session.user.role === "CLIENT" ? (
-          <Link href={`/${locale}/portal/kyc`}>{c.onboarding}</Link>
+          session.user.accountType === "INDIVIDUAL" ? (
+            <Link href={`/${locale}/portal/kyc`}>{c.onboarding}</Link>
+          ) : (
+            <Link href={`/${locale}/portal/entity`}>
+              {lang === "ar" ? "تسجيل الجهات" : "Organization onboarding"}
+            </Link>
+          )
         ) : (
           <Link href={`/${locale}/portal/admin/kyc`}>{c.review}</Link>
         )}
-        {session.user.role === "CLIENT" && (
+        {session.user.role === "CLIENT" && session.user.accountType === "INDIVIDUAL" && (
           <Link href={`/${locale}/portal/banks`}>{bankCopy[lang].nav}</Link>
         )}
       </nav>

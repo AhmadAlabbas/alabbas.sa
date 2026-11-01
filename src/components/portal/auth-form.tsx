@@ -119,6 +119,21 @@ export function AuthForm({
           />
         </label>
       )}
+      {screen === "sign-up" && !runtime.demo && (
+        <label>
+          {locale === "ar" ? "نوع المستثمر" : "Investor type"}
+          <select name="accountType" defaultValue="INDIVIDUAL" required>
+            <option value="INDIVIDUAL">{locale === "ar" ? "فرد" : "Individual"}</option>
+            <option value="INSTITUTION">{locale === "ar" ? "شركة أو مؤسسة" : "Corporation / institution"}</option>
+            <option value="GOVERNMENT">{locale === "ar" ? "جهة حكومية" : "Government entity"}</option>
+          </select>
+          <span className="form-note">
+            {locale === "ar"
+              ? "اختيار نوع الحساب لا يثبت صفتك، وتظل الموافقة خاضعة للتحقق المستقل."
+              : "Selecting a category does not verify your authority. Institutional access remains subject to independent review."}
+          </span>
+        </label>
+      )}
       {showEmail && (
         <label>
           {c.email}
