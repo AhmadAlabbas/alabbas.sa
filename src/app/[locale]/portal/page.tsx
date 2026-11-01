@@ -12,7 +12,8 @@ export default async function Page({
   } catch {
     redirect(`/${locale}/auth/sign-in`);
   }
-  redirect(
-    `/${locale}/portal/${session.user.role === "CLIENT" ? "dashboard" : "admin/kyc"}`,
-  );
+  const destination = session.user.role !== "CLIENT"
+    ? "admin/kyc"
+    : session.user.accountType === "INDIVIDUAL" ? "dashboard" : "entity";
+  redirect(`/${locale}/portal/${destination}`);
 }
