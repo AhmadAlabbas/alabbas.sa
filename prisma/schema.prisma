@@ -66,6 +66,7 @@ model User {
   notificationReads NotificationRead[]
   bankConnections   BankConnection[]
   bankEvents        BankEvent[]
+  entityApplication EntityApplication?
 }
 
 enum BankStatus {
@@ -304,4 +305,27 @@ model DataRequest {
   resolvedAt DateTime?
 
   @@index([userId, createdAt])
+}
+
+
+// Applications are NOT verified legal entities or trading authorizations.
+// A self-declared investor category never grants institutional permissions.
+enum EntityApplicationStatus {
+  SUBMITTED
+  CHANGES_REQUESTED
+  VERIFIED
+  REJECTED
+}
+
+model EntityApplication {
+  id            String                  @id @default(cuid()) @db.VarChar(30)
+  userId        String                  @unique @db.VarChar(30)
+  user          User                    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  kind          AccountType
+  status        EntityApplicationStatus @default(SUBMITTED)
+  encryptedData String                  @db.LongText
+  submittedAt   DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@index([status, submittedAt])
 }
